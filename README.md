@@ -3,6 +3,7 @@
 ## Setup
 
 ```bash
+mkdir -p envs
 mamba env create -f environment.yml -p envs/mice-gut
 mamba activate envs/mice-gut
 ```
