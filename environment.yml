@@ -1,0 +1,7 @@
+name: mice-gut
+channels:
+  - conda-forge
+  - bioconda
+dependencies:
+  - python
+  - pandas
