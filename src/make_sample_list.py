@@ -16,7 +16,7 @@ sample3,1,data/sample3_R1.fastq.gz,data/sample3_R2.fastq.gz,
 failed=["H19","C33"]
 basedir="/proj/snic2020-5-486/dbp_gut_microbiome/DataDelivery_2023-01-10_15-17-23_ngisthlm00104/files/P27457"
 sample_info=f"{basedir}/00-Reports/O.Karlsson_22_02_sample_info.txt"
-sample_groups="/proj/snic2020-5-486/nobackup/SMS-23-6668-micegut/datasample_groups.csv"
+sample_groups="/proj/snic2020-5-486/nobackup/SMS-23-6668-micegut/data/sample_groups.csv"
 dfgroups = pd.read_csv(sample_groups, index_col=0).to_dict(orient="index")
 df = pd.read_csv(sample_info, sep="\t", index_col=1)
 sample_dict = {}
