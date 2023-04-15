@@ -1,4 +1,3 @@
-#!/bin/bash -c
 module purge
 module load uppmax bioinfo-tools Nextflow/22.10.1
 NXF_HOME="/proj/snic2020-5-486/nobackup/SMS-23-6668-micegut/.nextflow"
