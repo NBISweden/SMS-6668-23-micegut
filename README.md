@@ -4,11 +4,16 @@
 
 ```bash
 mamba env create -f environment.yml
-mamba activate envs/mice-gut
+mamba activate mice-gut
+# Copy scripts to set and unset environment variables
 mkdir -p $CONDA_PREFIX/etc/conda/deactivate.d $CONDA_PREFIX/etc/conda/activate.d
 cp src/activate.d/env_vars.sh $CONDA_PREFIX/etc/conda/activate.d/
 cp src/deactivate.d/env_vars.sh $CONDA_PREFIX/etc/conda/deactivate.d/
+# Re-activate the environment
+mamba activate mice-gut
 ```
+
+On subsequent runs, simply run `mamba activate mice-gut`
 
 ## Setup
 
