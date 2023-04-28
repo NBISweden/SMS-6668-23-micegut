@@ -14,4 +14,4 @@ binning_map_mode: "all"
 gtdb: "/sw/data/uppnex/GTDB/R202/src/gtdbtk_data.tar.gz"
 email: "john.sundh@scilifelab.se"
 email_on_fail: "john.sundh@scilifelab.se"
-
+max_cpus: 20
