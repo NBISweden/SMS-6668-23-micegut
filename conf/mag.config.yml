@@ -1,4 +1,4 @@
-input: "/proj/snic2020-5-486/nobackup/SMS-23-6668-micegut/data/sample_list.csv"
+#input: "/proj/snic2020-5-486/nobackup/SMS-23-6668-micegut/data/sample_list.csv"
 outdir: "/proj/snic2020-5-486/nobackup/SMS-23-6668-micegut/mag/"
 host_fasta: "/proj/snic2020-5-486/nobackup/SMS-23-6668-micegut/data/genome_ref/GRCm39.fasta"
 save_hostremoved_reads: true
