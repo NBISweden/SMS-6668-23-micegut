@@ -1,6 +1,7 @@
 #!/bin/bash -l
 #SBATCH -A snic2022-5-350
 #SBATCH -p node
+#SBATCH -n 20
 #SBATCH -t 240:00:00
 #SBATCH -J mag.node
 
