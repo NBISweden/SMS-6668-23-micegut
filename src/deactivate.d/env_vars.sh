@@ -1,5 +1,6 @@
 #!/bin/sh
 
+unset CONDARC
 unset NXF_HOME
 unset NXF_OPTS
 unset NXF_SINGULARITY_CACHEDIR
