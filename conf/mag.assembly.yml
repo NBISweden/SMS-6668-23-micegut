@@ -1,11 +1,9 @@
-#input: "/proj/snic2020-5-486/nobackup/SMS-23-6668-micegut/data/sample_list.csv"
+skip_binning: true
 outdir: "/proj/snic2020-5-486/nobackup/SMS-23-6668-micegut/mag/"
 host_fasta: "/proj/snic2020-5-486/nobackup/SMS-23-6668-micegut/data/genome_ref/GRCm39.fasta"
 save_hostremoved_reads: true
 host_removal_verysensitive: true
 bowtie2_mode: "--very-sensitive"
-#cat_db: "/proj/snic2020-5-486/nobackup/SMS-23-6668-micegut/data/cat_db/CAT_prepare_20210107.tar.gz"
-#cat_official_taxonomy: true
 binqc_tool: "busco"
 megahit_fix_cpu_1: false
 skip_spades: true
