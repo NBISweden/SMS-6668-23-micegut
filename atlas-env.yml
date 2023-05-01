@@ -1,0 +1,8 @@
+name: micegut-atlas
+channels:
+  - conda-forge
+  - bioconda
+dependencies:
+  - metagenome-atlas=2.15.0
+  - pandas
+  - cookiecutter
