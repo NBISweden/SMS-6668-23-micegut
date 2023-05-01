@@ -1,3 +1,8 @@
+.nextflow*
+mag
+atlas
+work
+resources
 */.ipynb_checkpoints
 *.swp
 *.html
