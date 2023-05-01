@@ -44,7 +44,11 @@ def make_sample_list(pipeline, failed, basedir, sample_info, sample_groups):
         except KeyError:
             group = "unknown"
         # Replace space with underscore in sample name
-        sample = row[0].replace(" ", "_")
+        if pipeline == "atlas":
+            repl = "-"
+        else:
+            repl = "_"
+        sample = row[0].replace(" ", repl)
         # Add suffix to sample (makes e.g. 'm.c' samples unique)
         suffix = ""
         if sample in sample_num.keys() and sample_num[sample] > 0:
