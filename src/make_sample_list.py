@@ -52,7 +52,7 @@ def make_sample_list(pipeline, failed, basedir, sample_info, sample_groups):
         # Add suffix to sample (makes e.g. 'm.c' samples unique)
         suffix = ""
         if sample in sample_num.keys() and sample_num[sample] > 0:
-            suffix = f"_{sample_num[sample]+1}"
+            suffix = f"{repl}{sample_num[sample]+1}"
         sample_num[sample]+=1
         ngi_id = row[1]["NGI ID"]
         R1 = glob.glob(f"{basedir}/{ngi_id}/**/*R1*.fastq.gz", recursive=True)
