@@ -28,7 +28,7 @@ basedir="/proj/snic2020-5-486/dbp_gut_microbiome/DataDelivery_2023-01-10_15-17-2
 sample_info=f"{basedir}/00-Reports/O.Karlsson_22_02_sample_info.txt"
 sample_groups="/proj/snic2020-5-486/nobackup/SMS-23-6668-micegut/data/sample_groups.csv"
 
-def make_sample_list(pipeline, failed, basedir, sample_info, sample_groups);
+def make_sample_list(pipeline, failed, basedir, sample_info, sample_groups):
     dfgroups = pd.read_csv(sample_groups, index_col=0).to_dict(orient="index")
     df = pd.read_csv(sample_info, sep="\t", index_col=1)
     sample_dict = {}
@@ -85,3 +85,5 @@ def main(args):
 if __name__ == "__main__":
     parser = ArgumentParser()
     parser.add_argument("pipeline", type=str, choices=["mag","atlas"], help="Choose pipeline to output sample list for")
+	args = parser.parse_args()
+	main(args)
