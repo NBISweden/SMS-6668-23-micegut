@@ -74,10 +74,10 @@ def make_sample_list(pipeline, failed, basedir, sample_info, sample_groups):
         sample_list = sample_list.loc[:, ["group","short_reads_1","short_reads_2","long_reads"]]
         sep=","
     else:
-        sample_list = sample_list.loc[:, ["Reads_raw_1","Reads_raw_2","Reads_QC_R1","Reads_QC_R2","BinGroup"]]
+        sample_list = sample_list.loc[:, ["Reads_raw_R1","Reads_raw_R2","Reads_QC_R1","Reads_QC_R2","BinGroup"]]
         sep="\t"
     with sys.stdout as fhout:
-        sample_list.to_csv(fhout, sep=",")
+        sample_list.to_csv(fhout, sep=sep)
 
 def main(args):
     make_sample_list(args.pipeline, failed, basedir, sample_info, sample_groups)
