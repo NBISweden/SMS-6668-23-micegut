@@ -37,7 +37,7 @@ runtime: #in h
 # Local directory for temp files, useful for cluster execution without shared file system
 tmpdir: "$TMPDIR/"
 # directory where databases are downloaded with 'atlas download'
-database_dir: resources
+database_dir: /crex/proj/snic2020-5-486/nobackup/SMS-23-6668-micegut/resources
 
 ########################
 # Quality control
