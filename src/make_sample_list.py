@@ -89,7 +89,7 @@ if __name__ == "__main__":
     parser.add_argument("--sample_info", type=str, 
                         help="Sample info file from NGI",
                        default="00-Reports/O.Karlsson_22_02_sample_info.txt")
-    parser.add_argument("--sample_group", type=str,
+    parser.add_argument("--sample_groups", type=str,
                        default="/proj/snic2020-5-486/nobackup/SMS-23-6668-micegut/data/sample_groups.csv",
                        help="Sample groupings")
     parser.add_argument("--failed", nargs="*",
