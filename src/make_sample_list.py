@@ -23,11 +23,6 @@ S001    /Users/silas/Documents/metagenomics/data/S001_R1.fastq.gz       /Users/s
 S002    /Users/silas/Documents/metagenomics/data/S002_R1.fastq.gz       /Users/silas/Documents/metagenomics/data/S002_R2.fastq.gz                       Cage1
 """
 
-failed=["H19","C33"]
-basedir="/proj/snic2020-5-486/dbp_gut_microbiome/DataDelivery_2023-01-10_15-17-23_ngisthlm00104/files/P27457"
-sample_info=f"{basedir}/00-Reports/O.Karlsson_22_02_sample_info.txt"
-sample_groups="/proj/snic2020-5-486/nobackup/SMS-23-6668-micegut/data/sample_groups.csv"
-
 def make_sample_list(pipeline, failed, basedir, sample_info, sample_groups):
     dfgroups = pd.read_csv(sample_groups, index_col=0).to_dict(orient="index")
     df = pd.read_csv(sample_info, sep="\t", index_col=1)
@@ -65,8 +60,6 @@ def make_sample_list(pipeline, failed, basedir, sample_info, sample_groups):
             "BinGroup": group,
             "Reads_raw_R1": R1[0],
             "Reads_raw_R2": R2[0],
-            "Reads_QC_R1": "",
-            "Reads_QC_R2": "",
             "short_reads_1": R1[0],
             "short_reads_2": R2[0],
             "long_reads": "",
@@ -78,16 +71,29 @@ def make_sample_list(pipeline, failed, basedir, sample_info, sample_groups):
         sample_list = sample_list.loc[:, ["group","short_reads_1","short_reads_2","long_reads"]]
         sep=","
     else:
-        sample_list = sample_list.loc[:, ["Reads_raw_R1","Reads_raw_R2","Reads_QC_R1","Reads_QC_R2","BinGroup"]]
+        sample_list = sample_list.loc[:, ["Reads_raw_R1","Reads_raw_R2","BinGroup"]]
         sep="\t"
     with sys.stdout as fhout:
         sample_list.to_csv(fhout, sep=sep)
 
 def main(args):
-    make_sample_list(args.pipeline, failed, basedir, sample_info, sample_groups)
+    make_sample_list(args.pipeline, args.failed, args.basedir, f"{args.basedir}/{args.sample_info}", args.sample_groups)
 
 if __name__ == "__main__":
     parser = ArgumentParser()
-    parser.add_argument("pipeline", type=str, choices=["mag","atlas"], help="Choose pipeline to output sample list for")
+    parser.add_argument("pipeline", type=str, choices=["mag","atlas"], 
+                        help="Choose pipeline to output sample list for")
+    parser.add_argument("--basedir", type=str, 
+                        default="/proj/snic2020-5-486/dbp_gut_microbiome/DataDelivery_2023-01-10_15-17-23_ngisthlm00104/files/P27457",
+                        help="Base directory where fastq files are stored")
+    parser.add_argument("--sample_info", type=str, 
+                        help="Sample info file from NGI",
+                       default="00-Reports/O.Karlsson_22_02_sample_info.txt")
+    parser.add_argument("--sample_group", type=str,
+                       default="/proj/snic2020-5-486/nobackup/SMS-23-6668-micegut/data/sample_groups.csv",
+                       help="Sample groupings")
+    parser.add_argument("--failed", nargs="*",
+                       default=["H19","C33"],
+                       help="Sample(s) to ignore")
     args = parser.parse_args()
     main(args)
