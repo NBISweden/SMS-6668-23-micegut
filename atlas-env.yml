@@ -6,3 +6,5 @@ dependencies:
   - metagenome-atlas=2.15.0
   - pandas
   - cookiecutter
+  - fastqc
+  - multiqc
