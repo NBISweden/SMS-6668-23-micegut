@@ -32,7 +32,7 @@ rule fastqc:
         """
         mkdir -p $TMPDIR/{wildcards.sample}.fastqc
         fastqc -o $TMPDIR/{wildcards.sample}.fastqc {input} > {log} 2>&1
-        mv $TMPDIR/{wildcards.sample}.fastqc/{wildcards.sample}_QC_R{wildcards.n}_fastq.zip {params.outdir}
+        mv $TMPDIR/{wildcards.sample}.fastqc/{wildcards.sample}_QC_R{wildcards.n}_fastqc.zip {params.outdir}
         rm -rf $TMPDIR/{wildcards.sample}.fastqc
         """
 
