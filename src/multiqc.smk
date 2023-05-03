@@ -4,7 +4,9 @@ sample_file = config["samples"]
 
 samples = []
 with open(sample_file, 'r') as fhin:
-    for line in fhin:
+    for i, line in enumerate(fhin):
+		if i == 0:
+			continue
         samples.append(line.rstrip().rsplit()[0])
 
 rule all:
