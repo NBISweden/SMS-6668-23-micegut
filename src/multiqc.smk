@@ -42,10 +42,12 @@ rule multiqc:
     input:
         bbduk = expand("atlas/{sample}/logs/QC/quality_filter.log", 
             sample = samples),
-        fastqc = expand("atlas/fastqc/{sample}_QC_R{n}_fastq.zip", 
+        fastqc = expand("atlas/fastqc/{sample}_QC_R{n}_fastqc.zip", 
             sample = samples, n = ["1", "2"])
     log:
         "atlas/logs/multiqc/multiqc.log"
+    params:
+        outdir = lambda wildcards, output: os.path.dirname(output[0])
     shell:
         """
         multiqc --outdir {params.outdir} {input} > {log} 2>&1
