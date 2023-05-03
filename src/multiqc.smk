@@ -1,12 +1,14 @@
 import os
 
+localrules: multiqc, all
+
 sample_file = config["samples"]
 
 samples = []
 with open(sample_file, 'r') as fhin:
     for i, line in enumerate(fhin):
-		if i == 0:
-			continue
+        if i == 0:
+            continue
         samples.append(line.rstrip().rsplit()[0])
 
 rule all:
@@ -24,6 +26,8 @@ rule fastqc:
         "atlas/logs/fastqc/{sample}_R{n}.fastqc.log"
     params:
         outdir = lambda wildcards, output: os.path.dirname(output[0])
+    resources:
+        runtime = 60
     shell:
         """
         mkdir -p $TMPDIR/{wildcards.sample}.fastqc
