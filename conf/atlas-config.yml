@@ -203,7 +203,7 @@ annotations:
   - gtdb_taxonomy
   - genes
   - kegg_modules
- # - dram
+  - dram
 
 
 
