@@ -31,7 +31,7 @@ simplejob_threads: 4
 runtime: #in h
     default: 5
     assembly: 48
-    long: 24
+    long: 240
     simplejob: 1
 
 # Local directory for temp files, useful for cluster execution without shared file system
