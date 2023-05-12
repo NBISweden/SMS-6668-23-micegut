@@ -9,3 +9,4 @@ resources
 *.html
 *.idea
 envs/*
+doc/_extensions/**
