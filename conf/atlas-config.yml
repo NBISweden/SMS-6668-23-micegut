@@ -162,6 +162,7 @@ binner:                           # If DASTool is used as final_binner, use pred
   - metabat
   - maxbin
   - vamb
+  - concoct
 
 
 metabat:
