@@ -20,7 +20,7 @@ threads: 8
 mem: 60
 
 # threads and memory for jobs needing high amount of memory. e.g GTDB-tk,checkm or assembly
-large_mem: 250
+large_mem: 128
 large_threads: 16
 assembly_threads: 20
 assembly_memory: 128
@@ -156,13 +156,12 @@ minimum_map_quality: 10
 # Binning
 ########################
 
-final_binner: DASTool             # [SemiBin, DASTool, vamb, maxbin]
+final_binner: vamb           # [SemiBin, DASTool, vamb, maxbin]
 
 binner:                           # If DASTool is used as final_binner, use predictions of this binners
   - metabat
   - maxbin
   - vamb
-  - concoct
 
 
 metabat:
@@ -176,14 +175,14 @@ maxbin:
 
 DASTool:
   search_engine: 'diamond'
-  score_threshold: 0.5              # Score threshold until selection algorithm will keep selecting bins [0..1].
+  score_threshold: 0              # Score threshold until selection algorithm will keep selecting bins [0..1].
 
 
-genome_filter_criteria: "(Completeness-5*Contamination >50 ) & (Length_scaffolds >=50000) & (Ambigious_bases <1e6) & (N50 > 5*1e3) & (N_scaffolds < 1e3)"
-
+#genome_filter_criteria: "(Completeness-5*Contamination >50 ) & (Length_scaffolds >=50000) & (Ambigious_bases <1e6) & (N50 > 5*1e3) & (N_scaffolds < 1e3)"
+genome_filter_criteria: "(Completeness >= 50) & (Contamination<10)"
 
 genome_dereplication:
-  ANI: 0.975                     ## Genome dreplication threshold 0.95 is more or less species
+  ANI: 0.95                     ## Genome dreplication threshold 0.95 is more or less species
   overlap: 0.2                  # See more on https://drep.readthedocs.io/en/latest/module_descriptions.html
   greedy_clustering: "auto"     # Add options for greedy clustering 'auto' when using more than 5k bins
   score:
@@ -205,8 +204,6 @@ annotations:
   - genes
   - kegg_modules
   - dram
-
-
 
 gene_annotations:
   - eggNOG
