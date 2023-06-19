@@ -1,0 +1,26 @@
+name: R-statistics
+channels:
+  - conda-forge
+  - bioconda
+  - r
+dependencies:
+  - bioconductor-mixomics
+  - bioconductor-deseq2
+  - r-vegan
+  - r-irkernel
+  - jupyter
+  - python
+  - pandas
+  - seaborn
+  - nbconvert
+  - rpy2
+  - pyppeteer
+  - fastparquet
+  - pip
+  - scikit-learn
+  - umap-learn
+  - r-irkernel
+  - r-arrow
+  - pip:
+    - scikit-bio
+    - altair==5.0.0rc3  
