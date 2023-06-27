@@ -177,8 +177,30 @@ rule quantify_taxonomy:
         dataframe.drop("lineage", axis=1).to_csv(output.contig_cov, sep="\t")
         lineage_cov.to_csv(output.cov, sep="\t")
 
+def merge_taxcov(samples, results, seqTaxDB):
+    df = pd.DataFrame()
+    taxdict = {}
+    for sample in samples:
+        f = f"{results}/{sample}/annotation/mmseqs2/{seqTaxDB}.median_fold.tsv"
+        _df = pd.read_csv(f,sep="\t",index_col=0)
+        _df.rename(columns={"Median_fold": sample},inplace=True)
+        taxcols = _df.drop(sample,axis=1)
+        _taxdict = taxcols.to_dict(orient="index")
+        taxdict.update(_taxdict)
+        df = pd.merge(df,pd.DataFrame(_df.loc[:, sample]),right_index=True,left_index=True,how="outer")
+    return df, taxdict
+
 rule collate_taxcov:
     output:
-        results + "/taxonomy/{seqTaxDB}.median_fold.tsv"
+        tsv=results + "/taxonomy/{seqTaxDB}.median_fold.tsv"
     input:
         expand(results + "/{sample}/annotation/mmseqs2/{{seqTaxDB}}.median_fold.tsv", sample=samples.index)
+    run:
+        df = pd.DataFrame()
+        df, taxdict = merge_taxcov(samples.index, results, wildcards.seqTaxDB)
+        dataframe = pd.merge(pd.DataFrame(taxdict).T, df, left_index=True, right_index=True)
+        dataframe.fillna(0, inplace=True)
+        dataframe.index.name = "lineage"
+        dataframe.to_csv(output.tsv, sep="\t")
+
+
