@@ -6,15 +6,16 @@ import sys
 
 
 def sort_bitscore(df):
-    return df.sort_values("bitscore", ascending=False).head(1)
+    return df.sort_values("bitscore", ascending=False)
 
 
 def main(args):
     header = ["qseqid","sseqid","pident","length","mismatch","gapopen","qstart","qend","sstart","send","evalue","bitscore"]
     df = pd.read_csv(args.blastfile, sep="\t", header=None, names=header)
     df_filt = df.loc[(df.evalue<args.evalue)&(df.pident>=args.ident)]
-    df_filt = df_filt.groupby(level=0).apply(sort_bitscore)
-    df_filt.to_csv(sys.stdout, sep="\t")
+    df_filt_sort = df_filt.groupby(level=0).apply(sort_bitscore)
+    df_filt_best = df_filt_sort.groupby("qseqid").head(1).set_index("qseqid")
+    df_filt_best.to_csv(sys.stdout, sep="\t")
 
 
 if __name__ == "__main__":
