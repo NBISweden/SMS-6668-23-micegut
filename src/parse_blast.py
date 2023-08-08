@@ -22,7 +22,7 @@ if __name__ == "__main__":
     parser = ArgumentParser()
     parser.add_argument("blastfile", type=str,
                         help="Blast output")
-    parser.add_argument("-e", "--evalue", type = float, default = 0.0000000001,
+    parser.add_argument("-e", "--evalue", type = float, default = 10,
                         help="Evalue cutoff")
     parser.add_argument("-i", "--ident", type = int, default = 90,
                         help="Percent identity cutoff")
