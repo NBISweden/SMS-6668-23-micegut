@@ -204,3 +204,68 @@ rule collate_taxcov:
         dataframe.to_csv(output.tsv, sep="\t")
 
 
+##### resistance gene identifier #####
+
+rule download_rgi_data:
+    output:
+        json="resources/card/card.json",
+        version="resources/card/card.version"
+    log:
+        "resources/card/log"
+    params:
+        tar="resources/card/data.tar.gz",
+        dir=lambda w, output: os.path.dirname(output.json)
+    shell:
+         """
+         curl -L -o {params.tar} \
+            https://card.mcmaster.ca/latest/data >{log} 2>&1
+         tar -C {params.dir} -xf {params.tar} ./card.json
+         # Store download date in versionfile
+         date > {output.version}
+         rm {params.tar}
+         """
+
+rule rgi_genecatalog:
+    input:
+        faa=results+"/Genecatalog/gene_catalog.faa",
+        db="resources/card/card.json"
+    output:
+        json=results+"/Genecatalog/annotations/rgi.out.json",
+        txt=results+"/Genecatalog/annotations/rgi.out.txt"
+    log:
+        results+"/logs/rgi/rgi.log",
+    params:
+        out=results+"/Genecatalog/annotations/rgi.out",
+        settings="-a diamond --local --clean --input_type protein",
+        tmpdir="$TMPDIR/genecatalog.rgi",
+        faa="$TMPDIR/genecatalog.rgi/gene_catalog.faa",
+    shadow: "minimal"
+    conda:
+        "envs/rgi.yml"
+    threads: 10
+    resources:
+        runtime=60*24,
+        mem_mib=mem_allowed,
+        slurm_account=lambda wildcards: config["slurm_account"]
+    shell:
+        """
+        exec &>{log}
+        mkdir -p {params.tmpdir}
+        rgi load --card_json {input.db} --local
+        sed 's/*//g' {input.faa} > {params.faa}
+        rgi main -i {params.faa} -o {params.out} -n {threads} {params.settings}
+        rm -r {params.tmpdir}
+        """
+
+rule rgi_parse_genecatalog:
+    output:
+        tsv=results + "/Genecatalog/annotations/rgi.parsed.tsv"
+    input:
+        txt=rules.rgi_genecatalog.output.txt
+    run:
+        annot = pd.read_csv(input.txt, sep="\t", index_col=0)
+        annot = annot.loc[:,
+                ["Model_ID", "AMR Gene Family", "Resistance Mechanism"]]
+        annot.loc[:, "Model_ID"] = ["RGI_{}".format(x) for x in annot.Model_ID]
+        annot.rename(index=lambda x: x.split(" ")[0], inplace=True)
+        annot.to_csv(output.tsv, sep="\t", index=True)
