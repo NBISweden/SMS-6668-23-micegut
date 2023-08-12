@@ -253,7 +253,7 @@ rule rgi_genecatalog:
         """
         exec &>{log}
         mkdir -p {params.tmpdir}
-        cp {params.db} {params.tmpdir}
+        cp {input.db} {params.tmpdir}
         sed 's/*//g' {input.faa} > {params.faa}
         cd {params.tmpdir}
         rgi load --card_json card.json --local
