@@ -7,7 +7,8 @@ samples = pd.read_csv(config["sample_list"], sep="\t", index_col=0)
 genomes = [os.path.basename(x.replace(".faa", "")) for x in glob.glob(results + "/genomes/annotations/genes/*.faa")]
 
 localrules:
-    quantify_taxonomy
+    quantify_taxonomy,
+    download_rgi_data
 
 def mem_allowed(wildcards, threads):
     mem_per_core = config["mem_per_core"]
