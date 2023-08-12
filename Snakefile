@@ -259,7 +259,7 @@ rule rgi_genecatalog:
         rgi load --card_json card.json --local
         rgi main -i input.faa -o rgi.out -n {threads} {params.settings}
         mv rgi.out* {params.outdir}
-        rm -r {params.tmpdir}
+        rm -rf {params.tmpdir}
         """
 
 rule rgi_genomes:
@@ -293,7 +293,7 @@ rule rgi_genomes:
         rgi load --card_json card.json --local
         rgi main -i input.faa -o rgi.out -n {threads} {params.settings}
         mv rgi.out* {params.outdir}
-        rm -r {params.tmpdir}
+        rm -rf {params.tmpdir}
         """
 
 rule rgi_parse_genecatalog:
