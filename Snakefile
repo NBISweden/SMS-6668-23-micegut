@@ -238,7 +238,7 @@ rule rgi_genecatalog:
     log:
         results+"/logs/rgi/rgi.log",
     params:
-        outdir=lambda wildcards, output: os.path.dirname(output.txt),
+        outdir=lambda wildcards, output: os.path.abspath(".") + "/" + os.path.dirname(output.txt),
         settings="-a diamond --local --clean --input_type protein --debug",
         tmpdir="$TMPDIR/genecatalog.rgi",
         faa="$TMPDIR/genecatalog.rgi/input.faa",
@@ -246,7 +246,7 @@ rule rgi_genecatalog:
         "envs/rgi.yml"
     threads: 10
     resources:
-        runtime=60*24,
+        runtime=60,
         mem_mib=mem_allowed,
         slurm_account=lambda wildcards: config["slurm_account"]
     shell:
@@ -258,7 +258,7 @@ rule rgi_genecatalog:
         cd {params.tmpdir}
         rgi load --card_json card.json --local
         rgi main -i input.faa -o rgi.out -n {threads} {params.settings}
-        mv rgi.out* {params.outdir}
+        mv rgi.out* ${params.outdir}
         rm -r {params.tmpdir}
         """
 
@@ -272,7 +272,7 @@ rule rgi_genomes:
     log:
         results+"/logs/genomes/rgi/genomes.log",
     params:
-        outdir=lambda wildcards, output: os.path.dirname(output.txt),
+        outdir=lambda wildcards, output: os.path.abspath(".") + "/" + os.path.dirname(output.txt),
         settings="-a diamond --local --clean --input_type protein --debug",
         tmpdir="$TMPDIR/genomes.rgi",
         faa="$TMPDIR/genomes.rgi/input.faa",
@@ -280,7 +280,7 @@ rule rgi_genomes:
         "envs/rgi.yml"
     threads: 10
     resources:
-        runtime=60 * 24,
+        runtime=60,
         mem_mib=mem_allowed,
         slurm_account=lambda wildcards: config["slurm_account"]
     shell:
