@@ -239,7 +239,7 @@ rule rgi_genecatalog:
         results+"/logs/rgi/rgi.log",
     params:
         out=results+"/Genecatalog/annotations/rgi.out",
-        settings="-a diamond --local --clean --input_type protein",
+        settings="-a diamond --local --clean --input_type protein -d wgs",
         tmpdir="$TMPDIR/genecatalog.rgi",
         faa="$TMPDIR/genecatalog.rgi/gene_catalog.faa",
     shadow: "minimal"
@@ -258,23 +258,22 @@ rule rgi_genecatalog:
         sed 's/*//g' {input.faa} > {params.faa}
         rgi main -i {params.faa} -o {params.out} -n {threads} {params.settings}
         rm -r {params.tmpdir}
-        rgi clean --local
         """
 
 rule rgi_genomes:
     output:
-        json=results+"/genomes/annotations/rgi/{genome}.out.json",
-        txt=results+"/genomes/annotations/rgi/{genome}.out.txt"
+        json=results+"/genomes/annotations/rgi/genomes.out.json",
+        txt=results+"/genomes/annotations/rgi/genomes.out.txt"
     input:
-        faa=results+"/genomes/annotations/genes/{genome}.faa",
+        faa=expand(results+"/genomes/annotations/genes/{genome}.faa", genome = genomes),
         db="resources/card/card.json"
     log:
-        results+"/logs/genomes/rgi/{genome}.log",
+        results+"/logs/genomes/rgi/genomes.log",
     params:
-        out=results+"/genomes/annotations/rgi/{genome}.out",
-        settings="-a diamond --local --clean --input_type protein",
-        tmpdir="$TMPDIR/{genome}.rgi",
-        faa="$TMPDIR/{genome}.rgi/{genome}.faa",
+        out=results+"/genomes/annotations/rgi/genomes.out",
+        settings="-a diamond --local --clean --input_type protein -d wgs",
+        tmpdir="$TMPDIR/genomes.rgi",
+        faa="$TMPDIR/genomes.rgi/genomes.faa",
     shadow: "minimal"
     conda:
         "envs/rgi.yml"
@@ -289,16 +288,9 @@ rule rgi_genomes:
         mkdir -p {params.tmpdir}
         rgi load --card_json {input.db} --local
         sed 's/*//g' {input.faa} > {params.faa}
-        rgi main -i {params.faa} -o {params.out} -n {threads} {params.settings}
+        rgi main -i {params.faa} -o {params.out} -n {threads} {params.settings} -d wgs
         rm -r {params.tmpdir}
-        rgi clean --local
         """
-
-rule all_rgi_genomes:
-    output:
-        touch(results + "/genomes/annotations/rgi/done")
-    input:
-        expand(results+"/genomes/annotations/rgi/{genome}.out.txt", genome = genomes)
 
 rule rgi_parse_genecatalog:
     output:
