@@ -4,4 +4,6 @@ channels:
   - bioconda
   - defaults
 dependencies:
-  - rgi
+  - python
+  - diamond=0.8.36
+  - pip
