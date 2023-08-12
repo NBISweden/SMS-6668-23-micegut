@@ -254,11 +254,11 @@ rule rgi_genecatalog:
         """
         exec &>{log}
         mkdir -p {params.tmpdir}
-        rgi clean --local
         rgi load --card_json {input.db} --local
         sed 's/*//g' {input.faa} > {params.faa}
         rgi main -i {params.faa} -o {params.out} -n {threads} {params.settings}
         rm -r {params.tmpdir}
+        rgi clean --local
         """
 
 rule rgi_genomes:
@@ -291,6 +291,7 @@ rule rgi_genomes:
         sed 's/*//g' {input.faa} > {params.faa}
         rgi main -i {params.faa} -o {params.out} -n {threads} {params.settings}
         rm -r {params.tmpdir}
+        rgi clean --local
         """
 
 rule all_rgi_genomes:
