@@ -1,8 +1,10 @@
 import os
 import pandas as pd
+import glob
 
-samples = pd.read_csv(config["sample_list"], sep="\t", index_col=0)
 results = config["results_dir"]
+samples = pd.read_csv(config["sample_list"], sep="\t", index_col=0)
+genomes = [os.path.basename(x.replace(".faa", "")) for x in glob.glob(results + "/genomes/annotations/genes/*.faa")]
 
 localrules:
     quantify_taxonomy
@@ -251,11 +253,50 @@ rule rgi_genecatalog:
         """
         exec &>{log}
         mkdir -p {params.tmpdir}
+        rgi clean --local
         rgi load --card_json {input.db} --local
         sed 's/*//g' {input.faa} > {params.faa}
         rgi main -i {params.faa} -o {params.out} -n {threads} {params.settings}
         rm -r {params.tmpdir}
         """
+
+rule rgi_genomes:
+    output:
+        json=results+"/genomes/annotations/rgi/{genome}.out.json",
+        txt=results+"/genomes/annotations/rgi/{genome}.out.txt"
+    input:
+        faa=results+"/genomes/annotations/genes/{genome}.faa",
+        db="resources/card/card.json"
+    log:
+        results+"/logs/genomes/rgi/{genome}.log",
+    params:
+        out=results+"/genomes/annotations/rgi/{genome}.out",
+        settings="-a diamond --local --clean --input_type protein",
+        tmpdir="$TMPDIR/{genome}.rgi",
+        faa="$TMPDIR/{genome}.rgi/{genome}.faa",
+    shadow: "minimal"
+    conda:
+        "envs/rgi.yml"
+    threads: 10
+    resources:
+        runtime=60*10,
+        mem_mib=mem_allowed,
+        slurm_account=lambda wildcards: config["slurm_account"]
+    shell:
+        """
+        exec &>{log}
+        mkdir -p {params.tmpdir}
+        rgi load --card_json {input.db} --local
+        sed 's/*//g' {input.faa} > {params.faa}
+        rgi main -i {params.faa} -o {params.out} -n {threads} {params.settings}
+        rm -r {params.tmpdir}
+        """
+
+rule all_rgi_genomes:
+    output:
+        touch(results + "/genomes/annotations/rgi/done")
+    input:
+        expand(results+"/genomes/annotations/rgi/{genome}.out.txt", genome = genomes)
 
 rule rgi_parse_genecatalog:
     output:
