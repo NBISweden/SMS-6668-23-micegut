@@ -239,7 +239,7 @@ rule rgi_genecatalog:
         results+"/logs/rgi/rgi.log",
     params:
         out=results+"/Genecatalog/annotations/rgi.out",
-        settings="-a diamond --local --clean --input_type protein -d wgs",
+        settings="-a diamond --local --clean --input_type protein --debug",
         tmpdir="$TMPDIR/genecatalog.rgi",
         faa="$TMPDIR/genecatalog.rgi/gene_catalog.faa",
     shadow: "minimal"
@@ -271,7 +271,7 @@ rule rgi_genomes:
         results+"/logs/genomes/rgi/genomes.log",
     params:
         out=results+"/genomes/annotations/rgi/genomes.out",
-        settings="-a diamond --local --clean --input_type protein -d wgs",
+        settings="-a diamond --local --clean --input_type protein --debug",
         tmpdir="$TMPDIR/genomes.rgi",
         faa="$TMPDIR/genomes.rgi/genomes.faa",
     shadow: "minimal"
@@ -288,7 +288,7 @@ rule rgi_genomes:
         mkdir -p {params.tmpdir}
         rgi load --card_json {input.db} --local
         sed 's/*//g' {input.faa} > {params.faa}
-        rgi main -i {params.faa} -o {params.out} -n {threads} {params.settings} -d wgs
+        rgi main -i {params.faa} -o {params.out} -n {threads} {params.settings}
         rm -r {params.tmpdir}
         """
 
