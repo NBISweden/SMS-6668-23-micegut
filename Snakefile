@@ -241,8 +241,7 @@ rule rgi_genecatalog:
         out=results+"/Genecatalog/annotations/rgi.out",
         settings="-a diamond --local --clean --input_type protein --debug",
         tmpdir="$TMPDIR/genecatalog.rgi",
-        faa="$TMPDIR/genecatalog.rgi/gene_catalog.faa",
-    shadow: "minimal"
+        faa="$TMPDIR/genecatalog.rgi/input.faa",
     conda:
         "envs/rgi.yml"
     threads: 10
@@ -254,9 +253,11 @@ rule rgi_genecatalog:
         """
         exec &>{log}
         mkdir -p {params.tmpdir}
-        rgi load --card_json {input.db} --local
+        cp {params.db} {params.tmpdir}
         sed 's/*//g' {input.faa} > {params.faa}
-        rgi main -i {params.faa} -o {params.out} -n {threads} {params.settings}
+        cd {params.tmpdir}
+        rgi load --card_json card.json --local
+        rgi main -i input.faa -o {params.out} -n {threads} {params.settings}
         rm -r {params.tmpdir}
         """
 
