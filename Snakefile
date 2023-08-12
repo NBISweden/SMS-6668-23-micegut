@@ -238,7 +238,7 @@ rule rgi_genecatalog:
     log:
         results+"/logs/rgi/rgi.log",
     params:
-        out=results+"/Genecatalog/annotations/rgi.out",
+        outdir=lambda wildcards, output: os.path.dirname(output.txt),
         settings="-a diamond --local --clean --input_type protein --debug",
         tmpdir="$TMPDIR/genecatalog.rgi",
         faa="$TMPDIR/genecatalog.rgi/input.faa",
@@ -257,7 +257,8 @@ rule rgi_genecatalog:
         sed 's/*//g' {input.faa} > {params.faa}
         cd {params.tmpdir}
         rgi load --card_json card.json --local
-        rgi main -i input.faa -o {params.out} -n {threads} {params.settings}
+        rgi main -i input.faa -o rgi.out -n {threads} {params.settings}
+        mv rgi.out* {params.outdir}
         rm -r {params.tmpdir}
         """
 
@@ -271,25 +272,27 @@ rule rgi_genomes:
     log:
         results+"/logs/genomes/rgi/genomes.log",
     params:
-        out=results+"/genomes/annotations/rgi/genomes.out",
+        outdir=lambda wildcards, output: os.path.dirname(output.txt),
         settings="-a diamond --local --clean --input_type protein --debug",
         tmpdir="$TMPDIR/genomes.rgi",
-        faa="$TMPDIR/genomes.rgi/genomes.faa",
-    shadow: "minimal"
+        faa="$TMPDIR/genomes.rgi/input.faa",
     conda:
         "envs/rgi.yml"
     threads: 10
     resources:
-        runtime=60*10,
+        runtime=60 * 24,
         mem_mib=mem_allowed,
         slurm_account=lambda wildcards: config["slurm_account"]
     shell:
         """
         exec &>{log}
         mkdir -p {params.tmpdir}
-        rgi load --card_json {input.db} --local
+        cp {input.db} {params.tmpdir}
         sed 's/*//g' {input.faa} > {params.faa}
-        rgi main -i {params.faa} -o {params.out} -n {threads} {params.settings}
+        cd {params.tmpdir}
+        rgi load --card_json card.json --local
+        rgi main -i input.faa -o rgi.out -n {threads} {params.settings}
+        mv rgi.out* {params.outdir}
         rm -r {params.tmpdir}
         """
 
