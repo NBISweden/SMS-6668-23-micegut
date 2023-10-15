@@ -1,0 +1,7 @@
+---
+title: Overview
+author: John Sundh
+format: confluence-html
+---
+
+This is the documentation for the NBIS support project #6668. This project investigates the effects of dibutyl phthalate (DBP, a plastic-derived contaminant) on gut microbiome composition and potential functional profile in three generations of mice (F0 “chemical-exposed mice" and F1 and F2 offsprings).

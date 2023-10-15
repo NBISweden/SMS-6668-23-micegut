@@ -1,0 +1,24 @@
+---
+title: Completed tasks
+author: John Sundh
+date: last-modified
+---
+
+As of 8 September 2023, roughly 80 hours (out of 80 hours contracted) had been used. Completed tasks are shown below:
+
+| task name | comment | estimated time (h) | completed |
+| --------- | ------- | ------------------ | --------- |
+| Sample preprocessing | Read trimming, filtering and QC | 10 | yes |
+| Metagenomic assembly | Assembly and evaluation (e.g. N50, reads mapped etc.) | 15 | yes |
+| Metagenomic binning | Group assembled contigs into genome bins (including taxonomic assignment of hiqh-quality bins) | 15 | yes |
+| Metagenomic annotation | e.g. eggnog-mapper, CAZY db | 15 | yes |
+| Taxonomic profiling | Using e.g. Metaphlan/Kraken2 with preprocessed reads | 5 | no |
+| Taxonomic assignment | Assign taxonomy to assembled contigs using e.g. MMSeqs2 | 10 | yes |
+| Identification of virulence factors | Identify VFs in samples, potentially using genome bins  | 10 | yes |
+
+In addition, a statistical analysis of the taxonomic and functional results has been performed and discussed with the group. For details see the following notebooks:
+
+- [aldex2-analysis.ipynb](notebooks/aldex2-analysis.ipynb)
+- [deseq2-analysis.ipynb](notebooks/deseq2-analysis.ipynb)
+- [mixomics-analysis.ipynb](notebooks/mixomics-analysis.ipynb)
+- [statistical-analyses.ipynb](notebooks/statistical-analyses.ipynb)
