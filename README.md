@@ -8,14 +8,14 @@ _Support #6668 Shotgun metagenomic sequencing - Three-generations microbiome stu
 
 Several of the R-packages used require a Linux kernel with the AMD 
 architecture. This repo contains a Dockerfile at
-[doc/Dockerfile](doc/Dockerfile) which can be used to create a Linux based 
+[envs/Dockerfile](envs/Dockerfile) which can be used to create a Linux based 
 Docker image with a conda environment that allows you to run several 
 R-packages for statistical analyses in a Jupyter notebook.
 
 To create the image run:
 
 ```bash
-docker build -f doc/Dockerfile -t stats_linux doc/
+docker build -f envs/Dockerfile -t stats_linux envs/
 ```
 
 Then to start a Jupyter server run:
