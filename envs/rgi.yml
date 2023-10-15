@@ -1,3 +1,8 @@
+# Skeleton conda environment for RGI tool
+# After this environment was installed with snakemake --conda-create-envs-only
+# the environment was activated and biopython + rgi was installed using pip
+# This was followed by patching the ConvertRGIJsonToTsv.py script to set
+# hit_start and hit_end to 0 to circumvent a KeyError.
 name: rgi
 channels:
   - conda-forge
