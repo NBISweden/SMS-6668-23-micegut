@@ -1,0 +1,18 @@
+sample_list: "data/sample_list_atlas.tsv"
+database_dir: "resources"
+results_dir: "atlas"
+slurm_account: "naiss2023-5-326"
+mem_per_core: 6000
+taxonomy:
+    seqTaxDB:
+        #- "NR"
+        - "UniRef100"
+        #- "UniProtKB"
+    ranks:
+        - "superkingdom"
+        - "phylum"
+        - "class"
+        - "order"
+        - "family"
+        - "genus"
+        - "species"
