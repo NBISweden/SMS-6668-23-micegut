@@ -215,9 +215,9 @@ genecatalog:
   source: contigs               # [contigs, genomes] Predict genes from all contigs or only from the representative genomes
   clustermethod: mmseqs       # [mmseqs or linclust] see mmseqs for more details
   minlength_nt: 270             # min length 
-  minid: 0.90                   # min id for gene clustering for the main gene catalog used for annotation
-  coverage: 0.9
-  extra: " "
+  minid: 1.0                   # min id for gene clustering for the main gene catalog used for annotation
+  coverage: 0.95
+  extra: "--cov-mode 1 --cluster-mode 2"
   SubsetSize: 500000
 
 eggNOG_use_virtual_disk: true   # coping the eggNOG DB to a virtual disk can sppeed up the annotation
