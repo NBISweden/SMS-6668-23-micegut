@@ -1,0 +1,5 @@
+project:
+  type: confluence
+format:
+  confluence-html:
+    code-fold: true
