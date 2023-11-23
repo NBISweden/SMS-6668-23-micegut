@@ -1,4 +1,8 @@
+cluster-config: "cluster_config.yaml"
+config: "samples=atlas/samples.tsv"
+configfile: "conf/config.yml"
 use-conda: true
+jobs: 100
 conda-frontend: mamba
 reason: true
 slurm: true
@@ -8,3 +12,4 @@ rerun-incomplete: true  # recomended for cluster submissions
 keep-going: true
 reason: true
 printshellcmds: true
+default-resources: "slurm_account=naiss2023-5-326"
