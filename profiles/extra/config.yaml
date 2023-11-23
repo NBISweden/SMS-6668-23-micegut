@@ -1,0 +1,10 @@
+use-conda: true
+conda-frontend: mamba
+reason: true
+slurm: true
+cores: 99 # how many jobs you want to submit to your cluster queue
+local-cores: 1
+rerun-incomplete: true  # recomended for cluster submissions
+keep-going: true
+reason: true
+printshellcmds: true

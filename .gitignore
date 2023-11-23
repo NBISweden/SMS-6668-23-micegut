@@ -9,3 +9,10 @@ resources
 *.html
 *.idea
 envs/*
+!envs/*.yml
+!envs/Dockerfile
+doc/_site
+.Trash*
+atlas-mock
+*.Rdata
+*.svg

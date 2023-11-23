@@ -264,8 +264,8 @@ rule rgi_genecatalog:
 
 rule rgi_genomes:
     output:
-        json=results+"/genomes/annotations/rgi/genomes.out.json",
-        txt=results+"/genomes/annotations/rgi/genomes.out.txt"
+        json=results+"/genomes/annotations/rgi/rgi.out.json",
+        txt=results+"/genomes/annotations/rgi/rgi.out.txt"
     input:
         faa=expand(results+"/genomes/annotations/genes/{genome}.faa", genome = genomes),
         db="resources/card/card.json"
