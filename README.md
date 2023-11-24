@@ -2,7 +2,27 @@
 
 _Support #6668 Shotgun metagenomic sequencing - Three-generations microbiome study_
 
-- Project report: [doc/project-report.ipynb](doc/project-report.ipynb).
+## Installation
+
+A conda environment file with the software used to run the Atlas workflow is provided as `atlas-env.yml`. To create the environment run:
+
+```bash
+conda env create -f atlas-env.yml
+```
+
+Then activate the environment with:
+
+```bash
+conda activate atlas
+```
+
+Patching the atlas workflow installation:
+
+1. The version of the GUNC software used in atlas v2.15.0 was found to be incompatible with version 2 of the python package `pandas`. We therefore manually set the pandas version to `1.5.3` in the `gunc.yaml` file of the Atlas workflow. (Locate this file with `find $CONDA_PREFIX -name gunc.yaml`).
+2. In order to get the DRAM software to work with our setup we had to replace the `CM.pm` perl module for the `tRNAscan-SE` program with a custom module obtained from the tRNAscan-SE developers (see GitHub issue [#23](https://github.com/UCSC-LoweLab/tRNAscan-SE/issues/23)). The custom module is found in the GitHub repository linked above under `src/CM.pm`. The non-working module was replaced by activating the specific conda environment containing tRNAscan-SE then running `cp src/CM.pm $CONDA_PREFIX/lib/tRNAscan-SE/tRNAscanSE/CM.pm`.
+3. We also found that the DRAM software used by Atlas required a configuration file to be passed to the `DRAM.py annotate` and `DRAM.py distill` with `--config_loc`. This configuration file is also found in the GitHub repository linked above under `resources/DRAM/DRAM.config`. A modified version of the `dram.smk` rules file is availble under `src/dram.smk` and can be used to replace the original file in the Atlas workflow by running `cp src/dram.smk $(find $CONDA_PREFIX -name "dram.smk")`
+4. Because atlas version 2.15.0 does not include any filtering of mapped reads we modified the atlas source code to allow passing `minmapq` to the `pileup.sh` script used when calculating coverages. These changes are tracked at [https://github.com/johnne/atlas](https://github.com/johnne/atlas). Following these modifications we set `minimum_map_quality: 10` in the atlas config. In order to use the `minmapq` parameter, replace the following files `genecatalog.smk`, `assemble.smk` and `genomes.smk` from the `src/` directory in this repository with the corresponding files in the atlas workflow installation. The files can be located with `find $CONDA_PREFIX -name "genecatalog.smk"` etc.
+
 
 ## Running Jupyter notebook with R kernel
 
