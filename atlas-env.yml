@@ -1,4 +1,4 @@
-name: micegut-atlas
+name: atlas
 channels:
   - conda-forge
   - bioconda
