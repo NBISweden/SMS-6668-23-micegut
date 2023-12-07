@@ -14,9 +14,9 @@ def main(args):
         df = pd.read_csv(f, sep="\t", index_col=0)
         mapped = df["Plus_reads"].sum() + df["Minus_reads"]
         samples[sample] = mapped
-    df = pd.DataFrame.from_dict(samples, columns=["Mapped_reads"])
+    df = pd.DataFrame(samples, index=["Mapped_reads"])
     df.index.name = "Sample"
-    df.to_csv(sys.stdout, sep="\t")
+    df.T.to_csv(sys.stdout, sep="\t")
 
 if __name__ == "__main__":
     parser = ArgumentParser(
