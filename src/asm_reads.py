@@ -12,7 +12,7 @@ def main(args):
     for f in files:
         sample = f.split("/")[-4]
         df = pd.read_csv(f, sep="\t", index_col=0)
-        mapped = df["Plus_reads"].sum() + df["Minus_reads"]
+        mapped = df["Plus_reads"].sum() + df["Minus_reads"].sum()
         samples[sample] = mapped
     df = pd.DataFrame(samples, index=["Mapped_reads"])
     df.index.name = "Sample"
