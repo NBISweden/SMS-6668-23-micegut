@@ -155,7 +155,7 @@ rule quantify_taxonomy:
         contig_cov= results + "/{sample}/annotation/mmseqs2/{seqTaxDB}.contig.median_fold.tsv"
     input:
         tsv=rules.mmseqs2_createtsv.output.tsv, # e.g. atlas/C1/annotation/mmseqs2/UniRef100.taxonomy.tsv
-        cov=results + "/{sample}/assembly/contig_stats/prefilter_coverage_stats.txt" # e.g. atlas/C1/assembly/contig_stats/prefilter_coverage_stats.txt
+        cov=results + "/{sample}/assembly/contig_stats/postfilter_coverage_stats.txt" # e.g. atlas/C1/assembly/contig_stats/prefilter_coverage_stats.txt
     params:
         ranks = config["taxonomy"]["ranks"]
     run:
