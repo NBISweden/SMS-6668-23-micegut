@@ -2,7 +2,6 @@
 
 from argparse import ArgumentParser
 import pandas as pd
-from Bio.SeqIO import parse
 import sys
 
 
