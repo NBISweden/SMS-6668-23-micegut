@@ -239,7 +239,7 @@ rule rgi_genecatalog:
         results+"/logs/rgi/rgi.log",
     params:
         outdir=lambda wildcards, output: os.path.abspath(".") + "/" + os.path.dirname(output.txt),
-        settings="-a diamond --local --clean --input_type protein --debug",
+        settings="-a diamond --local --clean --input_type protein --debug --include_loose --include_nudge",
         tmpdir="$TMPDIR/genecatalog.rgi",
         faa="$TMPDIR/genecatalog.rgi/input.faa",
     conda:
