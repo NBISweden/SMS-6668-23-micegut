@@ -313,7 +313,7 @@ rule rgi_parse_genecatalog:
         annot = pd.read_csv(input.txt, sep="\t", index_col=0)
         annot = annot.loc[(annot.Cut_Off!="Loose")|((annot["Best_Identities"]>=params.best_hit_id)&(annot["Best_Hit_Bitscore"]>=params.best_hit_bitscore)&(annot["Percentage Length of Reference Sequence"]>=params.percent_length))]
         annot = annot.loc[:,
-                ["Model_ID", "AMR Gene Family", "Resistance Mechanism", "Cut_Off"]]
+                ["Model_ID", "Best_Hit_ARO", "AMR Gene Family", "Resistance Mechanism", "Cut_Off"]]
         annot.loc[:, "Model_ID"] = ["RGI_{}".format(x) for x in annot.Model_ID]
         annot.rename(index=lambda x: x.split(" ")[0], inplace=True)
         annot.to_csv(output.tsv, sep="\t", index=True)
@@ -331,7 +331,7 @@ rule rgi_parse_genomes:
         annot = pd.read_csv(input.txt, sep="\t", index_col=0)
         annot = annot.loc[(annot.Cut_Off!="Loose")|((annot["Best_Identities"]>=params.best_hit_id)&(annot["Best_Hit_Bitscore"]>=params.best_hit_bitscore)&(annot["Percentage Length of Reference Sequence"]>=params.percent_length))]
         annot = annot.loc[:,
-                ["Model_ID", "AMR Gene Family", "Resistance Mechanism", "Cut_Off"]]
+                ["Model_ID", "Best_Hit_ARO", "AMR Gene Family", "Resistance Mechanism", "Cut_Off"]]
         annot.loc[:, "Model_ID"] = ["RGI_{}".format(x) for x in annot.Model_ID]
         annot.rename(index=lambda x: x.split(" ")[0], inplace=True)
         annot.to_csv(output.tsv, sep="\t", index=True)
@@ -349,8 +349,10 @@ def read_h5(filename):
 rule sum_rgi_genecatalog:
     output:
         rgi_model=results + "/Genecatalog/counts/rgi_model.parsed.tsv",
+        rgi_aro=results + "/Genecatalog/counts/rgi_aro.parsed.tsv",
         rgi_family=results + "/Genecatalog/counts/rgi_family.parsed.tsv",
         rgi_model_strict = results + "/Genecatalog/counts/rgi_model_strict.parsed.tsv",
+        rgi_aro_strict = results + "/Genecatalog/counts/rgi_aro_strict.parsed.tsv",
         rgi_family_strict = results + "/Genecatalog/counts/rgi_family_strict.parsed.tsv"
     input:
         tsv=rules.rgi_parse_genecatalog.output.tsv,
@@ -369,6 +371,9 @@ rule sum_rgi_genecatalog:
         rgi_model_sum = annot_cov.groupby("Model_ID").sum(numeric_only=True)
         rgi_model_sum = pd.merge(rgi_model_info, rgi_model_sum, left_index=True, right_index=True)
         rgi_model_sum.to_csv(output.rgi_model, sep="\t")
+        # Sum to ARO term
+        rgi_aro_info = annot.set_index("Best_Hit_ARO").groupby(level=0).first().loc[:, ["AMR Gene Family", "Resistance Mechanism"]]
+        rgi_aro_sum = annot_cov.groupby("Best_Hit_ARO").sum(numeric_only=True)
         # Sum to AMR family
         rgi_family_info = annot.set_index("AMR Gene Family").groupby(level=0).first().loc[:, ["Resistance Mechanism"]]
         rgi_family_sum = annot_cov.groupby("AMR Gene Family").sum(numeric_only=True)
