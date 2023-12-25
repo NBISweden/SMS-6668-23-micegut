@@ -310,7 +310,7 @@ rule rgi_parse_genecatalog:
         annot = pd.read_csv(input.txt, sep="\t", index_col=0)
         annot = annot.loc[(annot.Cut_Off!="Loose")|((annot["Best_Identities"]>=params.best_hit_id)&(annot["Best_Hit_Bitscore"]>=params.best_hit_bitscore)&(annot["Percentage Length of Reference Sequence"]>=params.percent_length))]
         annot = annot.loc[:,
-                ["Model_ID", "AMR Gene Family", "Resistance Mechanism"]]
+                ["Model_ID", "AMR Gene Family", "Resistance Mechanism", "Cut_Off"]]
         annot.loc[:, "Model_ID"] = ["RGI_{}".format(x) for x in annot.Model_ID]
         annot.rename(index=lambda x: x.split(" ")[0], inplace=True)
         annot.to_csv(output.tsv, sep="\t", index=True)
@@ -328,7 +328,7 @@ rule rgi_parse_genomes:
         annot = pd.read_csv(input.txt, sep="\t", index_col=0)
         annot = annot.loc[(annot.Cut_Off!="Loose")|((annot["Best_Identities"]>=params.best_hit_id)&(annot["Best_Hit_Bitscore"]>=params.best_hit_bitscore)&(annot["Percentage Length of Reference Sequence"]>=params.percent_length))]
         annot = annot.loc[:,
-                ["Model_ID", "AMR Gene Family", "Resistance Mechanism"]]
+                ["Model_ID", "AMR Gene Family", "Resistance Mechanism", "Cut_Off"]]
         annot.loc[:, "Model_ID"] = ["RGI_{}".format(x) for x in annot.Model_ID]
         annot.rename(index=lambda x: x.split(" ")[0], inplace=True)
         annot.to_csv(output.tsv, sep="\t", index=True)
