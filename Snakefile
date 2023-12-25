@@ -284,7 +284,8 @@ rule rgi_genomes:
     resources:
         runtime=60,
         mem_mib=mem_allowed,
-        slurm_account=lambda wildcards: config["slurm_account"]
+        slurm_account=lambda wildcards: config["slurm_account"],
+        constraint="mem256GB"
     shell:
         """
         exec &>{log}
