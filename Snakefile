@@ -345,3 +345,41 @@ def read_h5(filename):
         sample_names = hdf_file['data'].attrs['sample_names'].astype(str)
     return pd.DataFrame(dict(zip(sample_names, data_matrix)))
 
+rule sum_rgi_genecatalog:
+    output:
+        rgi_model=results + "/Genecatalog/counts/rgi_model.parsed.tsv",
+        rgi_family=results + "/Genecatalog/counts/rgi_family.parsed.tsv",
+        rgi_model_strict = results + "/Genecatalog/counts/rgi_model_strict.parsed.tsv",
+        rgi_family_strict = results + "/Genecatalog/counts/rgi_family_strict.parsed.tsv"
+    input:
+        tsv=rules.rgi_parse_genecatalog.output.tsv,
+        h5=results + "/Genecatalog/counts/median_coverage.h5",
+        parquet=results + "/Genecatalog/counts/gene_coverage_stats.parquet",
+    run:
+        import pandas as pd
+        import h5py
+        median_coverage = read_h5(input.h5)
+        gene_coverage_stats = pd.read_parquet(input.parquet)
+        median_coverage.index = [x.split(" ")[0] for x in gene_coverage_stats["#Name"]]
+        annot = pd.read_csv(input.tsv, sep="\t", index_col=0)
+        annot_cov = pd.merge(annot, median_coverage, left_index=True, right_index=True)
+        # Sum to AMR model
+        rgi_model_info = annot.set_index("Model_ID").groupby(level=0).first().loc[:, ["AMR Gene Family", "Resistance Mechanism"]]
+        rgi_model_sum = annot_cov.groupby("Model_ID").sum(numeric_only=True)
+        rgi_model_sum = pd.merge(rgi_model_info, rgi_model_sum, left_index=True, right_index=True)
+        rgi_model_sum.to_csv(output.rgi_model, sep="\t")
+        # Sum to AMR family
+        rgi_family_info = annot.set_index("AMR Gene Family").groupby(level=0).first().loc[:, ["Resistance Mechanism"]]
+        rgi_family_sum = annot_cov.groupby("AMR Gene Family").sum(numeric_only=True)
+        rgi_family_sum = pd.merge(rgi_family_info, rgi_family_sum, left_index=True, right_index=True)
+        rgi_family_sum.to_csv(output.rgi_family, sep="\t")
+        # Sum to AMR model strict
+        rgi_model_strictsum = annot_cov.loc[annot_cov.Cut_Off!="Loose"].groupby("Model_ID").sum(numeric_only=True)
+        rgi_model_strictsum = pd.merge(rgi_model_info, rgi_model_strictsum, left_index=True, right_index=True)
+        rgi_model_strictsum.to_csv(output.rgi_model_strict, sep="\t")
+        # Sum to AMR family strict
+        rgi_family_strictsum = annot_cov.loc[annot_cov.Cut_Off!="Loose"].groupby("AMR Gene Family").sum(numeric_only=True)
+        rgi_family_strictsum = pd.merge(rgi_family_info, rgi_family_strictsum, left_index=True, right_index=True)
+        rgi_family_strictsum.to_csv(output.rgi_family_strict, sep="\t")
+
+        
