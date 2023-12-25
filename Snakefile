@@ -10,7 +10,8 @@ localrules:
     quantify_taxonomy,
     download_rgi_data,
     rgi_parse_genecatalog,
-    rgi_parse_genomes
+    rgi_parse_genomes,
+    sum_rgi_genecatalog
 
 def mem_allowed(wildcards, threads):
     mem_per_core = config["mem_per_core"]
