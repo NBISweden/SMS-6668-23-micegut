@@ -274,7 +274,7 @@ rule rgi_genomes:
         results+"/logs/genomes/rgi/genomes.log",
     params:
         outdir=lambda wildcards, output: os.path.abspath(".") + "/" + os.path.dirname(output.txt),
-        settings="-a diamond --local --clean --input_type protein --debug",
+        settings="-a diamond --local --clean --input_type protein --debug --include_nudge --include_loose",
         tmpdir="$TMPDIR/genomes.rgi",
         faa="$TMPDIR/genomes.rgi/input.faa",
     conda:
@@ -302,8 +302,31 @@ rule rgi_parse_genecatalog:
         tsv=results + "/Genecatalog/annotations/rgi.parsed.tsv"
     input:
         txt=rules.rgi_genecatalog.output.txt
+    params:
+        best_hit_id=40,
+        best_hit_bitscore=100,
+        percent_length=50
     run:
         annot = pd.read_csv(input.txt, sep="\t", index_col=0)
+        annot = annot.loc[(annot.Cut_Off!="Loose")|((annot["Best_Identities"]>=params.best_hit_id)&(annot["Best_Hit_Bitscore"]>=params.best_hit_bitscore)&(annot["Percentage Length of Reference Sequence"]>=params.percent_length))]
+        annot = annot.loc[:,
+                ["Model_ID", "AMR Gene Family", "Resistance Mechanism"]]
+        annot.loc[:, "Model_ID"] = ["RGI_{}".format(x) for x in annot.Model_ID]
+        annot.rename(index=lambda x: x.split(" ")[0], inplace=True)
+        annot.to_csv(output.tsv, sep="\t", index=True)
+
+rule rgi_parse_genomes:
+    output:
+        tsv=results + "/genomes/annotations/rgi/rgi.parsed.tsv"
+    input:
+        txt=rules.rgi_genomes.output.txt
+    params:
+        best_hit_id=40,
+        best_hit_bitscore=100,
+        percent_length=50
+    run:
+        annot = pd.read_csv(input.txt, sep="\t", index_col=0)
+        annot = annot.loc[(annot.Cut_Off!="Loose")|((annot["Best_Identities"]>=params.best_hit_id)&(annot["Best_Hit_Bitscore"]>=params.best_hit_bitscore)&(annot["Percentage Length of Reference Sequence"]>=params.percent_length))]
         annot = annot.loc[:,
                 ["Model_ID", "AMR Gene Family", "Resistance Mechanism"]]
         annot.loc[:, "Model_ID"] = ["RGI_{}".format(x) for x in annot.Model_ID]
