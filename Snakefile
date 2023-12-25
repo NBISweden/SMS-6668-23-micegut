@@ -374,6 +374,8 @@ rule sum_rgi_genecatalog:
         # Sum to ARO term
         rgi_aro_info = annot.set_index("Best_Hit_ARO").groupby(level=0).first().loc[:, ["AMR Gene Family", "Resistance Mechanism"]]
         rgi_aro_sum = annot_cov.groupby("Best_Hit_ARO").sum(numeric_only=True)
+        rgi_aro_sum = pd.merge(rgi_aro_info, rgi_aro_sum, left_index=True, right_index=True)
+        rgi_aro_sum.to_csv(output.rgi_aro, sep="\t")
         # Sum to AMR family
         rgi_family_info = annot.set_index("AMR Gene Family").groupby(level=0).first().loc[:, ["Resistance Mechanism"]]
         rgi_family_sum = annot_cov.groupby("AMR Gene Family").sum(numeric_only=True)
@@ -383,6 +385,10 @@ rule sum_rgi_genecatalog:
         rgi_model_strictsum = annot_cov.loc[annot_cov.Cut_Off!="Loose"].groupby("Model_ID").sum(numeric_only=True)
         rgi_model_strictsum = pd.merge(rgi_model_info, rgi_model_strictsum, left_index=True, right_index=True)
         rgi_model_strictsum.to_csv(output.rgi_model_strict, sep="\t")
+        # Sum to ARO term strict
+        rgi_aro_strictsum = annot_cov.loc[annot_cov.Cut_Off!="Loose"].groupby("Best_Hit_ARO").sum(numeric_only=True)
+        rgi_aro_strictsum = pd.merge(rgi_aro_info, rgi_aro_strictsum, left_index=True, right_index=True)
+        rgi_aro_strictsum.to_csv(output.rgi_aro_strict, sep="\t")
         # Sum to AMR family strict
         rgi_family_strictsum = annot_cov.loc[annot_cov.Cut_Off!="Loose"].groupby("AMR Gene Family").sum(numeric_only=True)
         rgi_family_strictsum = pd.merge(rgi_family_info, rgi_family_strictsum, left_index=True, right_index=True)
