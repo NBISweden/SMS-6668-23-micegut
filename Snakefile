@@ -280,7 +280,7 @@ rule rgi_genomes:
         faa="$TMPDIR/genomes.rgi/input.faa",
     conda:
         "envs/rgi.yml"
-    threads: 10
+    threads: 20
     resources:
         runtime=60,
         mem_mib=mem_allowed,
@@ -333,3 +333,14 @@ rule rgi_parse_genomes:
         annot.loc[:, "Model_ID"] = ["RGI_{}".format(x) for x in annot.Model_ID]
         annot.rename(index=lambda x: x.split(" ")[0], inplace=True)
         annot.to_csv(output.tsv, sep="\t", index=True)
+
+def read_h5(filename):
+    """
+    Reads a hdf file with h5py package and returns a data frame
+    """
+    import h5py
+    with h5py.File(filename, 'r') as hdf_file:
+        data_matrix = hdf_file['data'][:]
+        sample_names = hdf_file['data'].attrs['sample_names'].astype(str)
+    return pd.DataFrame(dict(zip(sample_names, data_matrix)))
+
