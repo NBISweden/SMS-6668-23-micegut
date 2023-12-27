@@ -8,6 +8,7 @@ genomes = [os.path.basename(x.replace(".faa", "")) for x in glob.glob(results + 
 
 localrules:
     quantify_taxonomy,
+    quantify_taxonomy_GC,
     download_rgi_data,
     rgi_parse_genecatalog,
     rgi_parse_genomes,
@@ -56,6 +57,41 @@ rule mmseqs2_create_queryDB:
         rm -rf {params.tmpdir}
         """
 
+rule mmseqs2_create_queryDB_GC:
+    """
+    MMseqs2 on Genecatalog
+    """
+    input:
+        fa=results + "/Genecatalog/gene_catalog.faa"
+    output:
+        queryDB=expand(
+            results + "/Genecatalog/annotations/mmseqs2/queryDB{suff}",
+            suff=["", "_h", ".index", "_h.index"],
+        ),
+    log:
+        results + "logs/Genecatalog/mmseqs2/createquerydb.log",
+    params:
+        mem_mib=mem_allowed,
+        outdir=lambda wildcards, output: os.path.dirname(output.queryDB[0]),
+        tmpdir="$TMPDIR/Genecatalog.mmseqs2",
+    envmodules:
+        "bioinfo-tools",
+        "MMseqs2/14-7e284",
+    conda:
+        "envs/mmseqs2.yml"
+    resources:
+        runtime=60 * 10,
+        mem_mib=mem_allowed,
+        slurm_account=lambda wildcards: config["slurm_account"],
+    shell:
+        """
+        mkdir -p {params.tmpdir}
+        mmseqs createdb {input.fa} {params.tmpdir}/queryDB --dbtype 1 --shuffle 0 \
+            --createdb-mode 1 --write-lookup 0 --id-offset 0 --compressed 0 -v 3 > {log} 2>&1
+        mv {params.tmpdir}/queryDB* {params.outdir}
+        rm -rf {params.tmpdir}
+        """
+
 rule mmseqs2_taxonomy:
     output:
         expand(
@@ -90,6 +126,44 @@ rule mmseqs2_taxonomy:
             --threads {threads} --local-tmp {params.tmpdir} --remove-tmp-files 1 > {log} 2>&1 
         """
 
+rule mmseqs2_taxonomy_GC:
+    """
+    MMseqs2 on Genecatalog
+    """
+    output:
+        expand(
+            results + "/Genecatalog/annotation/mmseqs2/{{seqTaxDB}}{suff}",
+            suff=[".dbtype", ".index", "_aln.dbtype", "_aln.index"],
+        ),
+    input:
+        queryDB=rules.mmseqs2_create_queryDB_GC.output.queryDB[0],
+        seqTaxDB=expand(config["database_dir"] + "/mmseqs2/{{seqTaxDB}}{suff}",
+                        suff=["","_taxonomy","_mapping","_h.dbtype","_h.index","_h",".lookup",".dbtype",".index"]),
+    log:
+        results + "/logs/Genecatalog/mmseqs2/{seqTaxDB}.taxonomy.log",
+    params:
+        lca_ranks=",".join(config["taxonomy"]["ranks"]),
+        out=lambda wildcards, output: os.path.dirname(output[0])+ "/"+ wildcards.seqTaxDB,
+        tmpdir="$TMPDIR/mmseqs.taxonomy.GC",
+        mem_mib=mem_allowed,
+    threads: 20
+    envmodules:
+        "bioinfo-tools",
+        "MMseqs2/14-7e284",
+    conda:
+        "envs/mmseqs2.yml"
+    resources:
+        runtime=1440,
+        mem_mib=mem_allowed,
+    shell:
+        """
+        mkdir -p {params.tmpdir}
+        mmseqs taxonomy {input.queryDB} {input.seqTaxDB[0]} {params.out} {params.tmpdir} \
+            --lca-mode 3 --tax-output-mode 2 --lca-ranks {params.lca_ranks} --tax-lineage 1 \
+            --threads {threads} --local-tmp {params.tmpdir} --remove-tmp-files 1 > {log} 2>&1 
+        """
+
+
 rule mmseqs2_createtsv:
     output:
         tsv=results + "/{sample}/annotation/mmseqs2/{seqTaxDB}.taxonomy.tsv",
@@ -109,6 +183,34 @@ rule mmseqs2_createtsv:
     threads: 10
     resources:
         runtime=60,
+        mem_mib=mem_allowed,
+        slurm_account=lambda wildcards: config["slurm_account"],
+    shell:
+        """
+        mmseqs createtsv {input.queryDB} {params.taxRes} {output.tsv} \
+            --threads {threads} --first-seq-as-repr 0 --target-column 1 \
+            --full-header 0 --idx-seq-src 0 --db-output 0 --compressed 0 -v 3
+        """
+
+rule mmseqs2_createtsv_GC:
+    output:
+        tsv=results + "/Genecatalog/annotation/mmseqs2/{seqTaxDB}.taxonomy.tsv",
+    input:
+        queryDB=rules.mmseqs2_create_queryDB_GC.output.queryDB[0],
+        taxRes=rules.mmseqs2_taxonomy_GC.output,
+    log:
+        results + "/logs/Genecatalog/logs/mmseqs2/{seqTaxDB}.createtsv.log",
+    params:
+        taxRes=lambda wildcards, input: os.path.dirname(input.taxRes[0])+ "/" + wildcards.seqTaxDB,
+        mem_mib=mem_allowed,
+    envmodules:
+        "bioinfo-tools",
+        "MMseqs2/14-7e284",
+    conda:
+        "envs/mmseqs2.yml"
+    threads: 10
+    resources:
+        runtime=60 * 24 * 10,
         mem_mib=mem_allowed,
         slurm_account=lambda wildcards: config["slurm_account"],
     shell:
@@ -144,6 +246,32 @@ rule mmseqs2_kronareport:
         mmseqs taxonomyreport {input.seqTaxDB[0]} {params.taxRes} {output.html} --report-mode 1 >{log} 2>&1 
         """
 
+rule mmseqs2_kronareport_GC:
+    output:
+        html=results + "/Genecatalog/annotation/mmseqs2/{seqTaxDB}.report.html"
+    input:
+        taxRes=rules.mmseqs2_taxonomy_GC.output,
+        seqTaxDB=expand(config["database_dir"] + "/mmseqs2/{{seqTaxDB}}{suff}",
+                        suff=["","_taxonomy","_mapping","_h.dbtype","_h.index","_h",".lookup",".dbtype",".index"]),
+    log:
+        results + "/logs/Genecatalog/mmseqs2/{seqTaxDB}.kronareport.log"
+    params:
+        taxRes=lambda wildcards, input: os.path.dirname(input.taxRes[0])+ "/" + wildcards.seqTaxDB,
+        mem_mib=mem_allowed,
+    envmodules:
+        "bioinfo-tools",
+        "MMseqs2/14-7e284",
+    conda:
+        "envs/mmseqs2.yml"
+    resources:
+        runtime=60,
+        mem_mib=mem_allowed,
+        slurm_account=lambda wildcards: config["slurm_account"]
+    shell:
+        """
+        mmseqs taxonomyreport {input.seqTaxDB[0]} {params.taxRes} {output.html} --report-mode 1 >{log} 2>&1 
+        """
+
 def split_ranks(df, ranks):
     uniq_lin = df.lineage.unique()
     d = {}
@@ -151,6 +279,26 @@ def split_ranks(df, ranks):
         d[lin] = dict(zip(ranks,lin.split(";")))
     return pd.DataFrame(d).T
 
+
+def parse_mmseqs2(tsv, cov, ranks):
+    import pandas as pd
+    # Read taxonomic assignments and fill NA values
+    taxdf = pd.read_csv(tsv, sep="\t", header=None, index_col=0, usecols=[0,8], names=["contig","lineage"])
+    taxdf.fillna("uc", inplace=True)
+    # Read coverage info for contigs, only storing the median fold values
+    covdf = pd.read_csv(cov, sep="\t", header=0, index_col=0, usecols=[0,9], names=["contig","Median_fold"])
+    # Extract ranks from unique assignments
+    lineage_df = split_ranks(taxdf, params.ranks)
+    # Merge rank assignments to taxonomy dataframe
+    dataframe = pd.merge(taxdf, lineage_df, left_on="lineage", right_index=True)
+    # Merge with coverage, taking the outer join
+    dataframe = pd.merge(dataframe, covdf, left_index=True, right_index=True, how="outer")
+    # Fill NA values
+    dataframe.loc[dataframe.lineage != dataframe.lineage, "lineage"] = ";".join(["unknown"]*len(params.ranks))
+    dataframe.fillna("unknown", inplace=True)
+    # Sum median fold values to lineage
+    lineage_cov = dataframe.groupby(["lineage"]+params.ranks).sum(numeric_only=True)
+    return lineage_cov, dataframe
 
 rule quantify_taxonomy:
     output:
@@ -162,25 +310,39 @@ rule quantify_taxonomy:
     params:
         ranks = config["taxonomy"]["ranks"]
     run:
-        import pandas as pd
-        # Read taxonomic assignments and fill NA values
-        taxdf = pd.read_csv(input.tsv, sep="\t", header=None, index_col=0, usecols=[0,8], names=["contig","lineage"])
-        taxdf.fillna("uc", inplace=True)
-        # Read coverage info for contigs, only storing the median fold values
-        covdf = pd.read_csv(input.cov, sep="\t", header=0, index_col=0, usecols=[0,9], names=["contig","Median_fold"])
-        # Extract ranks from unique assignments
-        lineage_df = split_ranks(taxdf, params.ranks)
-        # Merge rank assignments to taxonomy dataframe
-        dataframe = pd.merge(taxdf, lineage_df, left_on="lineage", right_index=True)
-        # Merge with coverage, taking the outer join
-        dataframe = pd.merge(dataframe, covdf, left_index=True, right_index=True, how="outer")
-        # Fill NA values
-        dataframe.loc[dataframe.lineage != dataframe.lineage, "lineage"] = ";".join(["unknown"]*len(params.ranks))
-        dataframe.fillna("unknown", inplace=True)
-        # Sum median fold values to lineage
-        lineage_cov = dataframe.groupby(["lineage"]+params.ranks).sum(numeric_only=True)
+        lineage_cov, dataframe = parse_mmseqs2(input.tsv, input.cov, params.ranks)
         # Write contig taxonomy + summed median fold values to files
         dataframe.drop("lineage", axis=1).to_csv(output.contig_cov, sep="\t")
+        lineage_cov.to_csv(output.cov, sep="\t")
+
+def read_h5(filename):
+    """
+    Reads a hdf file with h5py package and returns a data frame
+    """
+    with h5py.File(filename, 'r') as hdf_file:
+        data_matrix = hdf_file['data'][:]
+        sample_names = hdf_file['data'].attrs['sample_names'].astype(str)
+    return pd.DataFrame(dict(zip(sample_names, data_matrix)))
+
+rule quantify_taxonomy_GC:
+    output:
+        cov=results + "/Genecatalog/annotation/mmseqs2/{seqTaxDB}.median_fold.tsv",
+        gene_cov = results + "/Genecatalog/annotation/mmseqs2/{seqTaxDB}.gene.median_fold.tsv",
+    input:
+        tsv=rules.mmseqs2_createtsv_GC.output.tsv,
+        cov=results + "/Genecatalog/counts/median_coverage.h5",
+        gene_coverage_stats = results + "/Genecatalog/counts/gene_coverage_stats.parquet"
+    params:
+        ranks = config["taxonomy"]["ranks"]
+    run:
+        import pandas as pd
+        import h5py
+        cov = read_h5(input.cov)
+        gene_coverage_stats = pd.read_parquet(input.gene_coverage_stats)
+        cov.index = [x.split(" ")[0] for x in gene_coverage_stats["#Name"]]
+        lineage_cov, dataframe = parse_mmseqs2(cov, input.tsv, params.ranks)
+        # Write contig taxonomy + summed median fold values to files
+        dataframe.drop("lineage", axis=1).to_csv(output.gene_cov, sep="\t")
         lineage_cov.to_csv(output.cov, sep="\t")
 
 def merge_taxcov(samples, results, seqTaxDB):
