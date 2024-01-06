@@ -280,24 +280,42 @@ def split_ranks(df, ranks):
     return pd.DataFrame(d).T
 
 
-def parse_mmseqs2(tsv, cov, ranks):
+def parse_mmseqs2(tsv, cov, ranks, usecols=[0,8]):
     import pandas as pd
     # Read taxonomic assignments and fill NA values
-    taxdf = pd.read_csv(tsv, sep="\t", header=None, index_col=0, usecols=[0,8], names=["contig","lineage"])
+    taxdf = pd.read_csv(tsv, sep="\t", header=None, index_col=0, usecols=usecols, names=["contig","lineage"])
     taxdf.fillna("uc", inplace=True)
     # Read coverage info for contigs, only storing the median fold values
     covdf = pd.read_csv(cov, sep="\t", header=0, index_col=0, usecols=[0,9], names=["contig","Median_fold"])
     # Extract ranks from unique assignments
-    lineage_df = split_ranks(taxdf, params.ranks)
+    lineage_df = split_ranks(taxdf, ranks)
     # Merge rank assignments to taxonomy dataframe
     dataframe = pd.merge(taxdf, lineage_df, left_on="lineage", right_index=True)
     # Merge with coverage, taking the outer join
     dataframe = pd.merge(dataframe, covdf, left_index=True, right_index=True, how="outer")
     # Fill NA values
-    dataframe.loc[dataframe.lineage != dataframe.lineage, "lineage"] = ";".join(["unknown"]*len(params.ranks))
+    dataframe.loc[dataframe.lineage != dataframe.lineage, "lineage"] = ";".join(["unknown"]*len(ranks))
     dataframe.fillna("unknown", inplace=True)
     # Sum median fold values to lineage
-    lineage_cov = dataframe.groupby(["lineage"]+params.ranks).sum(numeric_only=True)
+    lineage_cov = dataframe.groupby(["lineage"]+ranks).sum(numeric_only=True)
+    return lineage_cov, dataframe
+
+def parse_mmseqs2_GC(tsv, cov, ranks, usecols=[0,4]):
+    import pandas as pd
+    # Read taxonomic assignments and fill NA values
+    taxdf = pd.read_csv(tsv, sep="\t", header=None, index_col=0, usecols=usecols, names=["Gene","lineage"])
+    taxdf.fillna("uc", inplace=True)
+    # Extract ranks from unique assignments
+    lineage_df = split_ranks(taxdf, ranks)
+    # Merge rank assignments to taxonomy dataframe
+    dataframe = pd.merge(taxdf, lineage_df, left_on="lineage", right_index=True)
+    # Merge with coverage, taking the outer join
+    dataframe = pd.merge(dataframe, cov, left_index=True, right_index=True, how="outer")
+    # Fill NA values
+    dataframe.loc[dataframe.lineage != dataframe.lineage, "lineage"] = ";".join(["unknown"]*len(ranks))
+    dataframe.fillna("unknown", inplace=True)
+    # Sum median fold values to lineage
+    lineage_cov = dataframe.groupby(["lineage"]+ranks).sum(numeric_only=True)
     return lineage_cov, dataframe
 
 rule quantify_taxonomy:
@@ -340,7 +358,7 @@ rule quantify_taxonomy_GC:
         cov = read_h5(input.cov)
         gene_coverage_stats = pd.read_parquet(input.gene_coverage_stats)
         cov.index = [x.split(" ")[0] for x in gene_coverage_stats["#Name"]]
-        lineage_cov, dataframe = parse_mmseqs2(cov, input.tsv, params.ranks)
+        lineage_cov, dataframe = parse_mmseqs2_GC(cov, input.tsv, params.ranks, [0,4])
         # Write contig taxonomy + summed median fold values to files
         dataframe.drop("lineage", axis=1).to_csv(output.gene_cov, sep="\t")
         lineage_cov.to_csv(output.cov, sep="\t")
